@@ -10,7 +10,8 @@ import System.Taffybar.MPRIS
 import System.Taffybar.Pager
 import System.Taffybar.Widgets.PollingBar
 import System.Taffybar.Widgets.PollingGraph
-
+import System.Taffybar.Widgets.PollingLabel
+import System.Taffybar.NetMonitor
 import System.Taffybar.WorkspaceSwitcher
 import System.Information.Memory
 import System.Information.CPU
@@ -50,9 +51,10 @@ main = do
       cpu = pollingGraphNew cpuCfg 0.5 cpuCallback
       tray = systrayNew
       battery = batteryBarNew  defaultBatteryConfig 25
+      net = netMonitorNew 1.5 "wlan0"
 
   defaultTaffybar defaultTaffybarConfig { startWidgets = [ pager, note ]
-                                        , endWidgets = [ tray, wea, clock,battery ,mem, cpu, mpris ]
+                                        , endWidgets = [ tray, wea, clock,battery ,net ,mem, cpu, mpris ]
                                         , monitorNumber = 1
                                         , barPosition = Bottom
                                         }

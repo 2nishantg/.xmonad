@@ -25,11 +25,12 @@ import XMonad.Layout.Tabbed
 import XMonad.Prompt
 import XMonad.Prompt.Input
 import XMonad.Prompt.Shell
+import XMonad.Actions.WindowBringer
 import XMonad.Hooks.EwmhDesktops
 import qualified XMonad.StackSet as W
 import XMonad.Util.EZConfig
 import XMonad.Util.Scratchpad
-
+import System.Exit
 import Data.Ratio ((%))
 
 main :: IO ()
@@ -60,12 +61,15 @@ main =
         , ((mod4Mask, xK_y), focusUrgent)
         , ((mod4Mask .|. controlMask, xK_space), myLayoutPrompt)
         , ((mod4Mask, xK_p), shellPrompt myXPConfig)
+        , ((mod4Mask .|. shiftMask, xK_q     ), kill) -- %! Close the focused window
+        , ((mod4Mask .|. shiftMask, xK_c     ), io exitSuccess)
+        , ((mod4Mask, xK_g     ), gotoMenu)
         ]
     myTerminal = "urxvt"
     myModMask = mod4Mask
     myWorkSpaces = ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι"]
---    scratchpad = scratchpadSpawnActionTerminal "urxvt"
-    scratchpad = scratchpadSpawnActionCustom "xterm -e ppkill  -name scratchpad"
+    scratchpad = scratchpadSpawnActionTerminal "urxvt"
+--    scratchpad = scratchpadSpawnActionCustom "xterm -e ps aux | percol | awk '{print $2}' | xargs kill $*  -name scratchpad"
 
        -- layouts
     myLayoutHook =
@@ -89,24 +93,25 @@ main =
             (mkComplFunFromList' allLayouts) ?+
         (sendMessage . JumpToLayout)
     myXPConfig =
-        defaultXPConfig
+        greenXPConfig
         { autoComplete = Just 1000
         , font         = myFont
-        , bgColor     = backgroundColor
-        , fgColor     = textColor
-        , fgHLight    = lightTextColor
-        , bgHLight    = lightBackgroundColor
-        , borderColor = lightBackgroundColor
+        -- , bgColor     = backgroundColor
+        -- , fgColor     = textColor
+        -- , fgHLight    = lightTextColor
+        -- , bgHLight    = lightBackgroundColor
+        -- , borderColor = lightBackgroundColor
         , promptBorderWidth = 0
+        , position = Top
         }
         where
-         myFont = "xft:Envy Code R:size=10"
-         focusColor = "#535d6c"
-         textColor = "#ff4500"
-         lightTextColor = "#222222"
-         backgroundColor = "#222222"
-         lightBackgroundColor = "#ff4500"
-         urgentColor = "#ffc000"
+         myFont = "xft:Input:size=9"
+         -- focusColor = "#535d6c"
+         -- textColor = "#ff4500"
+         -- lightTextColor = "#222222"
+         -- backgroundColor = "#222222"
+         -- lightBackgroundColor = "#ff4500"
+         -- urgentColor = "#ffc000"
     allLayouts = ["tall", "wide", "circle", "full", "tabbed", "accordion"]
    -- manageHook
     myManageHook =
@@ -118,5 +123,5 @@ main =
        composeAll
            [ appName =? "gimp-2.8" --> doFloat
            , className =? "wpa_gui" --> doFloat
-           , appName =? "google-chrome" --> doF (W.shift "3")
+           , appName =? "google-chrome-beta" --> doF (W.shift "3")
            , appName =? "xfrun4" --> doFloat]
