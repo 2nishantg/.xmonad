@@ -62,6 +62,7 @@ main =
         , ((mod4Mask, xK_y), focusUrgent)
         , ((mod4Mask .|. shiftMask, xK_space), myLayoutPrompt)
         , ((mod4Mask, xK_p), shellPrompt myXPConfig)
+        , ((mod4Mask .|. shiftMask     , xK_p), shellPrompt greenXPConfig {font = "xft:Input:size=9" })
         , ((mod4Mask .|. shiftMask, xK_q     ), kill) -- %! Close the focused window
         , ((mod4Mask .|. shiftMask, xK_c     ), io exitSuccess)
         , ((mod4Mask, xK_g     ), gotoMenu)
@@ -77,7 +78,7 @@ main =
         avoidStrutsOn [U] $
         smartBorders $
         onWorkspace "8" imLayout $
-        simplestFloat ||| tall ||| wide ||| full ||| circle ||| sTabbed ||| acc
+        tall ||| wide ||| full ||| circle ||| sTabbed ||| acc
     tall = renamed [Replace "tall"] $ Tall 1 3.0e-2 0.5
     wide = renamed [Replace "wide"] $ Mirror tall
     full = renamed [Replace "full"] $ Full
