@@ -45,7 +45,6 @@ main = do
                   , widgetSep        = " : "
                   }
       note = notifyAreaNew defaultNotificationConfig
-      wea = weatherNew (defaultWeatherConfig "KMSN") 10
       mpris = mprisNew defaultMPRISConfig
       mem = pollingGraphNew memCfg 1 memCallback
       cpu = pollingGraphNew cpuCfg 0.5 cpuCallback
@@ -54,7 +53,7 @@ main = do
       net = netMonitorNew 1.5 "wlan0"
 
   defaultTaffybar defaultTaffybarConfig { startWidgets = [ pager, note ]
-                                        , endWidgets = [ tray, wea, clock,battery ,net ,mem, cpu, mpris ]
+                                        , endWidgets = [ tray, clock,battery ,net ,mem, cpu, mpris ]
                                         , monitorNumber = 1
-                                        , barPosition = Bottom
-                                        }
+                                      --  , barPosition = Bottom
+                                          }

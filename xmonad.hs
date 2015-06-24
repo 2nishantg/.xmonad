@@ -22,6 +22,7 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.PerWorkspace
 import XMonad.Layout.Renamed
 import XMonad.Layout.Tabbed
+import XMonad.Layout.SimplestFloat
 import XMonad.Prompt
 import XMonad.Prompt.Input
 import XMonad.Prompt.Shell
@@ -59,7 +60,7 @@ main =
         , ((mod4Mask, xK_r), spawn "emacs")
         , ((mod4Mask, xK_u), scratchpad)
         , ((mod4Mask, xK_y), focusUrgent)
-        , ((mod4Mask .|. controlMask, xK_space), myLayoutPrompt)
+        , ((mod4Mask .|. shiftMask, xK_space), myLayoutPrompt)
         , ((mod4Mask, xK_p), shellPrompt myXPConfig)
         , ((mod4Mask .|. shiftMask, xK_q     ), kill) -- %! Close the focused window
         , ((mod4Mask .|. shiftMask, xK_c     ), io exitSuccess)
@@ -73,10 +74,10 @@ main =
 
        -- layouts
     myLayoutHook =
-        avoidStrutsOn [D] $
+        avoidStrutsOn [U] $
         smartBorders $
         onWorkspace "8" imLayout $
-        tall ||| wide ||| full ||| circle ||| sTabbed ||| acc
+        simplestFloat ||| tall ||| wide ||| full ||| circle ||| sTabbed ||| acc
     tall = renamed [Replace "tall"] $ Tall 1 3.0e-2 0.5
     wide = renamed [Replace "wide"] $ Mirror tall
     full = renamed [Replace "full"] $ Full
@@ -123,5 +124,5 @@ main =
        composeAll
            [ appName =? "gimp-2.8" --> doFloat
            , className =? "wpa_gui" --> doFloat
-           , appName =? "google-chrome-beta" --> doF (W.shift "3")
+           , appName =? "Google-chrome-beta" --> doF (W.shift "3")
            , appName =? "xfrun4" --> doFloat]
