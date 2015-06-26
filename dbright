@@ -1,0 +1,65 @@
+#!/bin/bash
+
+#Customize this stuff
+IF="Master"
+SECS="0.5"
+COLOR_ICON="#6e9bcf"
+FONT="fixed"
+BG="grey"
+FG="black"
+XPOS="750"
+YPOS="525"
+BG="#43464f"
+FG="#9ab8c2"
+WIDTH="400"
+HEIGHT="30"
+#Probably do not customize
+PIPE="/tmp/dbrightpipe"
+ICON=~/.xbm/eye_l.xbm
+err() {
+  echo "$1"
+  exit 1
+}
+
+usage() {
+  echo "usage: dvol [option] [argument]"
+  echo
+  echo "Options:"
+  echo "     -i, --increase - increase brightness by \`argument'"
+  echo "     -d, --decrease - decrease brightness by \`argument'"
+  echo "     -h, --help     - display this"
+  exit
+}
+#Argument Parsing
+case "$1" in
+  '-i'|'--increase')
+    [ -z "$2" ] && err "No argument specified for increase."
+    AMIXARG="+${2}"
+    ;;
+  '-d'|'--decrease')
+    [ -z "$2" ] && err "No argument specified for decrease."
+    AMIXARG="-${2}"
+    ;;
+   ''|'-h'|'--help')
+    usage
+    ;;
+  *)
+    err "Unrecognized option \`$1', see dvol --help"
+    ;;
+esac
+
+#Actual volume changing (readability low)
+AMIXOUT="$(xbacklight "$AMIXARG")"
+MUTE="$(cut -d '[' -f 4 <<<"$AMIXOUT")"
+VAL="$(xbacklight -get)"
+
+#Using named pipe to determine whether previous call still exists
+#Also prevents multiple volume bar instances
+if [ ! -e "$PIPE" ]; then
+  mkfifo "$PIPE"
+  (dzen2 -l 1 -x "$XPOS" -y "$YPOS" -w "$WIDTH" -h "$HEIGHT" -fn "$FONT" -bg "$BG" -fg "$FG" -e 'onstart=uncollapse' < "$PIPE"
+   rm -f "$PIPE") &
+fi
+
+#Feed the pipe!
+(echo " ^fg($COLOR_ICON)^i($ICON) Brightness" ; echo "$VAL" | gdbar -w 400 ; sleep "$SECS") > "$PIPE"

@@ -22,7 +22,6 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.PerWorkspace
 import XMonad.Layout.Renamed
 import XMonad.Layout.Tabbed
-import XMonad.Layout.SimplestFloat
 import XMonad.Prompt
 import XMonad.Prompt.Input
 import XMonad.Prompt.Shell
@@ -48,11 +47,13 @@ main =
   , focusedBorderColor = "Green"
   , borderWidth        = 1
   , workspaces         = myWorkSpaces
---  , startupHook        = spawn "taffybar"
+  , startupHook        = spawn "feh --bg-center /home/nis/.xmonad/wallpaper.jpg"
   } `additionalKeysP`
-        [ ("<XF86AudioRaiseVolume>", spawn "/home/nis/bin/volume_level.sh up")   -- volume up
-        , ("<XF86AudioLowerVolume>", spawn "/home/nis/bin/volume_level.sh down") -- volume down
-        , ("<XF86AudioMute>"       , spawn "/home/nis/bin/volume_level.sh mute") -- mute
+        [ ("<XF86AudioRaiseVolume>", spawn "/home/nis/bin/dvol up 10")   -- volume up
+        , ("<XF86AudioLowerVolume>", spawn "/home/nis/bin/dvol down 10") -- volume down
+        , ("<XF86AudioMute>"       , spawn "/home/nis/bin/dvol toggle") -- mute
+        , ("<XF86MonBrightnessDown>"       , spawn "/home/nis/bin/dbright -d 5") -- decrease Brightness
+        , ("<XF86MonBrightnessUp>"       , spawn "/home/nis/bin/dbright -i 5") -- decrease Brightness
         , ("<XF86Launch1>"         , spawn "dmenu_run")                             -- dmenu
         , ("<XF68ScreenSaver>"     , spawn "xlock")                                 -- lock screen
         ] `additionalKeys`
@@ -81,10 +82,10 @@ main =
         tall ||| wide ||| full ||| circle ||| sTabbed ||| acc
     tall = renamed [Replace "tall"] $ Tall 1 3.0e-2 0.5
     wide = renamed [Replace "wide"] $ Mirror tall
-    full = renamed [Replace "full"] $ Full
-    circle = renamed [Replace "circle"] $ circleSimpleDefaultResizable
-    sTabbed = renamed [Replace "tabbed"] $ simpleTabbed
-    acc = renamed [Replace "accordion"] $ Accordion
+    full = renamed [Replace "full"] Full
+    circle = renamed [Replace "circle"] circleSimpleDefaultResizable
+    sTabbed = renamed [Replace "tabbed"]  simpleTabbed
+    acc = renamed [Replace "accordion"] Accordion
     imLayout = withIM (1 % 7) pidginRoster Grid
     pidginRoster = ClassName "Pidgin" `And` Role "buddy_list"
     -- layout prompt (w/ auto-completion and all layouts)
@@ -125,5 +126,5 @@ main =
        composeAll
            [ appName =? "gimp-2.8" --> doFloat
            , className =? "wpa_gui" --> doFloat
-           , appName =? "Google-chrome-beta" --> doF (W.shift "3")
+           , appName =? "Google-chrome-beta" --> doShift "γ"
            , appName =? "xfrun4" --> doFloat]
