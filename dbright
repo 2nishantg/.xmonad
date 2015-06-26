@@ -57,9 +57,9 @@ VAL="$(xbacklight -get)"
 #Also prevents multiple volume bar instances
 if [ ! -e "$PIPE" ]; then
   mkfifo "$PIPE"
-  (dzen2 -l 1 -x "$XPOS" -y "$YPOS" -w "$WIDTH" -h "$HEIGHT" -fn "$FONT" -bg "$BG" -fg "$FG" -e 'onstart=uncollapse' < "$PIPE"
+  (dzen2 -l 1 -x "$XPOS" -y "$YPOS" -w "$WIDTH" -h "$HEIGHT" -fn "$FONT" -bg "#000000" -fg "$FG" -e 'onstart=uncollapse' < "$PIPE"
    rm -f "$PIPE") &
 fi
 
 #Feed the pipe!
-(echo " ^fg($COLOR_ICON)^i($ICON) Brightness" ; echo "$VAL" | gdbar -w 400 ; sleep "$SECS") > "$PIPE"
+(echo " ^fg(#696969)^i($ICON) Brightness" ; echo "$VAL" | gdbar -fg "#a9a9a9" -bg "#000000"  -w 400 ; sleep "$SECS") > "$PIPE"

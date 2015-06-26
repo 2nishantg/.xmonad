@@ -2,15 +2,13 @@
 
 #Customize this stuff
 IF="Master"
-SECS="0.5"
+SECS="1"
 COLOR_ICON="#6e9bcf"
 FONT="fixed"
 BG="grey"
 FG="black"
 XPOS="750"
 YPOS="525"
-BG="#43464f"
-FG="#9ab8c2"
 WIDTH="400"
 HEIGHT="30"
 #Probably do not customize
@@ -65,9 +63,9 @@ fi
 #Also prevents multiple volume bar instances
 if [ ! -e "$PIPE" ]; then
   mkfifo "$PIPE"
-  (dzen2 -l 1 -x "$XPOS" -y "$YPOS" -w "$WIDTH" -h "$HEIGHT" -fn "$FONT" -bg "$BG" -fg "$FG" -e 'onstart=uncollapse' < "$PIPE"
+  (dzen2 -l 1 -x "$XPOS" -y "$YPOS" -w "$WIDTH" -h "$HEIGHT" -fn "$FONT" -bg "#000000" -fg "#bebebe" -e 'onstart=uncollapse' < "$PIPE"
    rm -f "$PIPE") &
 fi
 
 #Feed the pipe!
-(echo " ^fg($COLOR_ICON)^i($ICON) Volume" ; echo "$VOL" | gdbar -max 150  -w 400 ; sleep "$SECS") > "$PIPE"
+(echo "^fg(#696969)^i($ICON) Volume" ; echo "$VOL" | gdbar -max 150 -bg "#000000" -fg "#a9a9a9" -w 400 ; sleep "$SECS") > "$PIPE"
