@@ -50,10 +50,10 @@ main = do
       cpu = pollingGraphNew cpuCfg 0.5 cpuCallback
       tray = systrayNew
       battery = batteryBarNew  defaultBatteryConfig 25
-      net = netMonitorNew 1.5 "wlan0"
-
+      net_wlan = netMonitorNew 1.5 "wlan0"
+      net_eth = netMonitorNew 1.5 "eth0"
   defaultTaffybar defaultTaffybarConfig { startWidgets = [ pager, note ]
-                                        , endWidgets = [ tray, clock,battery ,net ,mem, cpu, mpris ]
+                                        , endWidgets = [ tray, clock,battery, net_wlan, net_eth, mem, cpu, mpris ]
                                         , monitorNumber = 1
                                       --  , barPosition = Bottom
                                           }
