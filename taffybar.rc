@@ -1,0 +1,23 @@
+gtk_color_scheme = "black:#000000\nwhite:#D3D3D3\ngreen:#A9A9A9\nred:#696969"
+
+style "default" {
+  font_name = "FontAwesome 10"
+  bg[NORMAL]   = @black
+  fg[NORMAL]   = @white
+  text[NORMAL] = @white
+  fg[PRELIGHT] = @green
+  bg[PRELIGHT] = @black
+}
+
+style "active-window" = "default" {
+  fg[NORMAL] = @green
+}
+
+style "notification-button" = "default" {
+  text[NORMAL] = @red
+  fg[NORMAL]   = @red
+}
+
+widget "Taffybar*" style "default"
+widget "Taffybar*WindowSwitcher*label" style "active-window"
+widget "*NotificationCloseButton" style "notification-button"
