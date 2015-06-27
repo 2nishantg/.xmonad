@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Customize this stuff
-IF="Master"
+SINK="1" # Active Sink,Use this command to find - "pacmd list-sinks | grep "* index" | awk '{print $3}'"
 SECS="1"
 COLOR_ICON="#6e9bcf"
 FONT="fixed"
@@ -23,24 +23,33 @@ usage() {
   echo "usage: dvol [option] [argument]"
   echo
   echo "Options:"
-  echo "     -i, --increase - increase volume by \`argument'"
-  echo "     -d, --decrease - decrease volume by \`argument'"
-  echo "     -t, --toggle   - toggle mute on and off"
+  echo "     up - increase volume by \`argument'"
+  echo "     down - decrease volume by \`argument'"
+  echo "     set - set volume to \`argument'"
+  echo "     toggle - toggle mute on and off"
   echo "     -h, --help     - display this"
   exit
 }
 #Argument Parsing
+VOL="$(amixer -D pulse get Master | grep -o "\[.*%\]" | grep -o "[0-9]*" | head -n1)"
+
 case "$1" in
-  'up')
+    'up')
+    VALUE=$(( $VOL + $2 ))
     [ -z "$2" ] && err "No argument specified for increase."
-    AMIXARG="$1 ${2}"
+    AMIXARG=$(pactl set-sink-volume $SINK $(($VALUE>153?153:$VALUE))%)
     ;;
-  'down'|'set')
+  'down')
+    VALUE=$(( $VOL - $2 ))
     [ -z "$2" ] && err "No argument specified for decrease."
-    AMIXARG="$1 ${2}"
+    AMIXARG=$(pactl set-sink-volume $SINK $(($VALUE<0?0:$VALUE))%)
+    ;;
+  'set')
+    [ -z "$2" ] && err "No argument specified for decrease."
+    AMIXARG=$(pactl set-sink-volume $SINK $2%)
     ;;
   'toggle')
-    AMIXARG="toggle"
+      AMIXARG=(amixer -D pulse set Master Playback Switch toggle)
     ;;
   ''|'-h'|'--help')
     usage
@@ -49,15 +58,8 @@ case "$1" in
     err "Unrecognized option \`$1', see dvol --help"
     ;;
 esac
-
-#Actual volume changing (readability low)
-AMIXOUT="$(volume_control.py $AMIXARG)"
-MUTE="$(volume_control.py status)"
-if [ "$MUTE" = "muted" ]; then
-  VOL="0"
-else
-  VOL="$(volume_control.py read)"
-fi
+#Re-evaluating the volume because it has changed.
+VOL="$(amixer -D pulse get Master | grep -o "\[.*%\]" | grep -o "[0-9]*" | head -n1)"
 
 #Using named pipe to determine whether previous call still exists
 #Also prevents multiple volume bar instances
