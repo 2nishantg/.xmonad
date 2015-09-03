@@ -28,29 +28,29 @@ cpuCallback = do
 
 main :: IO ()
 main = do
-  let memCfg = defaultGraphConfig { graphDataColors = [(1, 1, 1, 1)]
-                                  , graphLabel = Just "Mem"
+  let memCfg = defaultGraphConfig { graphDataColors = [(0, 1, 1, 1)]
+                                  , graphLabel = Just "☡"
                                   }
-      cpuCfg = defaultGraphConfig { graphDataColors = [ (1, 1, 1, 1)
+      cpuCfg = defaultGraphConfig { graphDataColors = [ (1, 0, 0, 1)
                                                       , (1, 0, 1, 0.5)
                                                       ]
-                                  , graphLabel = Just "Cpu"
+                                  , graphLabel = Just "☣"
                                   }
-  let clock = textClockNew Nothing "<span fgcolor='dark grey'>%a %b %_d %H:%M</span>" 1
+  let clock = textClockNew Nothing "<span fgcolor='yellow'> ◴ %a %b %_d %H:%M</span>" 1
       pager = taffyPagerNew defaultPagerConfig
-                  { activeWindow     = colorize "#93a1a1" "" . escape . shorten 40
-                  , activeLayout     = escape
-                  , activeWorkspace  = colorize "#ffffff" "" . escape
-                  , hiddenWorkspace  = colorize "#aaaaaa" "" . escape
-                  , emptyWorkspace   = colorize "#666666" "" . escape
-                  , visibleWorkspace = colorize "#a88500" "" . escape
+                  { activeWindow     = colorize "#0C9D52" "" . escape . shorten 140
+                  , activeLayout     = colorize"#F5F5F5" "" . escape
+                  , activeWorkspace  = colorize "#4169E1" "" . escape
+                  , hiddenWorkspace  = colorize "#78898D" "" . escape
+                  , emptyWorkspace   = colorize "#34495E" "" . escape
+--                  , visibleWorkspace = colorize "#a88500" "" . escape
                   , urgentWorkspace  = colorize "red" "yellow" . escape
-                  , widgetSep        = " : "
+                  , widgetSep        = " "
                   }
       note = notifyAreaNew defaultNotificationConfig
       mpris = mprisNew defaultMPRISConfig
       mem = pollingGraphNew memCfg 1 memCallback
-      cpu = pollingGraphNew cpuCfg 0.5 cpuCallback
+      cpu = pollingGraphNew cpuCfg 1 cpuCallback
       tray = systrayNew
       battery = batteryBarNew  defaultBatteryConfig 25
       net_wlan = netMonitorNew 1.5 "wlan0"
@@ -58,5 +58,5 @@ main = do
   defaultTaffybar defaultTaffybarConfig { startWidgets = [ pager, note ]
                                         , endWidgets = [ tray, clock,battery, net_wlan, net_eth, mem, cpu, mpris ]
                                         , monitorNumber = 1
-                                      --  , barPosition = Bottom
+                                        , barPosition = Bottom
                                           }

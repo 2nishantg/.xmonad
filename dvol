@@ -37,7 +37,7 @@ case "$1" in
     'up')
     VALUE=$(( $VOL + $2 ))
     [ -z "$2" ] && err "No argument specified for increase."
-    AMIXARG=$(pactl set-sink-volume $SINK $(($VALUE>153?153:$VALUE))%)
+    AMIXARG=$(pactl set-sink-volume $SINK $(($VALUE>200?200:$VALUE))%)
     ;;
   'down')
     VALUE=$(( $VOL - $2 ))
@@ -70,4 +70,4 @@ if [ ! -e "$PIPE" ]; then
 fi
 
 #Feed the pipe!
-(echo "^fg(#696969)^i($ICON) Volume" ; echo "$VOL" | gdbar -max 150 -bg "#000000" -fg "#a9a9a9" -w 400 ; sleep "$SECS") > "$PIPE"
+(echo "^fg(#696969)^i($ICON) Volume" ; echo "$VOL" | gdbar -max 200 -bg "#000000" -fg "#a9a9a9" -w 400 ; sleep "$SECS") > "$PIPE"

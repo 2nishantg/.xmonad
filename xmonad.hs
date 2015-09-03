@@ -1,16 +1,15 @@
---
--- File     : ~/.xmonad/xmonad.hs
--- Author   : Yiannis Tsiouris (yiannist)
--- Desc     : A clean and well-documented xmonad configuration file (based on
---            the $HOME/.cabal/share/xmonad-0.10.1/man/xmonad.hs template file).
---
---            It uses:
---              * a ScratchPad (for a hidden terminal),
---              * an IM layout for Pidgin,
---              * a layout prompt (with auto-complete).
---
+--import XMonad.Layout.LayoutHints
+import Data.Ratio ((%))
+import System.Exit
 import XMonad hiding ((|||))
+import XMonad.Actions.WindowBringer
+import XMonad.Actions.WindowGo
+import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.ICCCMFocus
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.Accordion
 import XMonad.Layout.DecorationMadness
@@ -25,61 +24,99 @@ import XMonad.Layout.Tabbed
 import XMonad.Prompt
 import XMonad.Prompt.Input
 import XMonad.Prompt.Shell
-import XMonad.Actions.WindowBringer
-import XMonad.Hooks.EwmhDesktops
-import qualified XMonad.StackSet as W
+import XMonad.Util.Cursor
 import XMonad.Util.EZConfig
+import XMonad.Util.Run
 import XMonad.Util.Scratchpad
-import System.Exit
-import Data.Ratio ((%))
+import qualified XMonad.StackSet as W
 
 main :: IO ()
-main =
-    xmonad $ ewmh myConfig
-    where
-    myConfig  = defaultConfig {
-    modMask            = myModMask
-  , terminal           = myTerminal
-  , focusFollowsMouse  = True
-  , layoutHook         = myLayoutHook
-  , manageHook         = myManageHook <+> manageHook defaultConfig <+> manageDocks
-  , normalBorderColor  = "#2a2b2f"
-  , focusedBorderColor = "Green"
-  , borderWidth        = 1
-  , workspaces         = myWorkSpaces
-  , startupHook        = spawn "feh --bg-center /home/nis/.xmonad/wallpaper.jpg"
-  } `additionalKeysP`
-        [ ("<XF86AudioRaiseVolume>", spawn "/home/nis/bin/dvol up 10")   -- volume up
-        , ("<XF86AudioLowerVolume>", spawn "/home/nis/bin/dvol down 10") -- volume down
-        , ("<XF86AudioMute>"       , spawn "/home/nis/bin/dvol toggle") -- mute
-        , ("<XF86MonBrightnessDown>"       , spawn "/home/nis/bin/dbright -d 5") -- decrease Brightness
-        , ("<XF86MonBrightnessUp>"       , spawn "/home/nis/bin/dbright -i 5") -- decrease Brightness
-        , ("<XF86Launch1>"         , spawn "dmenu_run")                             -- dmenu
-        , ("<XF68ScreenSaver>"     , spawn "xlock")                                 -- lock screen
-        ] `additionalKeys`
-        [ ((mod4Mask, xK_b), spawn "google-chrome-beta")
-        , ((mod4Mask, xK_r), spawn "emacs")
+main = do
+--  d <- spawnPipe "dzen2 -p -y 1060 -x 0 -ta l -e 'onstart=lower'"
+  xmonad $ ewmh $  defaultConfig
+        { modMask = myModMask
+        , terminal = myTerminal
+        , focusFollowsMouse = True
+--        , logHook = myLogHook d
+        , layoutHook = myLayoutHook
+        , manageHook = manageDocks
+                   <+> manageHook defaultConfig
+                   <+> myManageHook
+                   <+> scratchpadManageHookDefault
+        , handleEventHook = XMonad.Hooks.EwmhDesktops.fullscreenEventHook
+        , normalBorderColor = "#2a2b2f"
+        , focusedBorderColor = "Green"
+        , borderWidth = 1
+        , workspaces = myWorkspaces
+        , startupHook = myStartupHook
+        } `additionalKeysP`
+        [ ("<XF86AudioRaiseVolume>", spawn "/home/nis/.xmonad/dvol up 10")   -- volume up
+        , ("<XF86AudioLowerVolume>", spawn "/home/nis/.xmonad/dvol down 10") -- volume down
+        , ("<XF86AudioMute>", spawn "/home/nis/.xmonad/dvol toggle") -- mute
+        , ("<XF86MonBrightnessDown>", spawn "/home/nis/.xmonad/dbright -d 5") -- decrease Brightness
+        , ("<XF86MonBrightnessUp>", spawn "/home/nis/.xmonad/dbright -i 5") -- decrease Brightness
+        , ("<XF86Launch1>", spawn "dmenu_run")                             -- dmenu
+        , ("<XF68ScreenSaver>", spawn "xlock")                                 -- lock screen
+         ] `additionalKeys`
+        [ ((mod4Mask, xK_b), runOrRaise "firefox" (className =? "Firefox"))
+        , ((mod4Mask, xK_e), spawn "emacsclient -c")
         , ((mod4Mask, xK_u), scratchpad)
         , ((mod4Mask, xK_y), focusUrgent)
         , ((mod4Mask .|. shiftMask, xK_space), myLayoutPrompt)
         , ((mod4Mask, xK_p), shellPrompt myXPConfig)
-        , ((mod4Mask .|. shiftMask     , xK_p), shellPrompt greenXPConfig {font = "xft:Input:size=9" })
-        , ((mod4Mask .|. shiftMask, xK_q     ), kill) -- %! Close the focused window
-        , ((mod4Mask .|. shiftMask, xK_c     ), io exitSuccess)
-        , ((mod4Mask, xK_g     ), gotoMenu)
-        ]
-    myTerminal = "urxvt"
+        , ( (mod4Mask .|. shiftMask, xK_p)
+          , shellPrompt
+                greenXPConfig
+                { font = "xft:PragmataPro:size=9"
+                })
+        , ((mod4Mask .|. shiftMask, xK_q), kill) -- %! Close the focused window
+        , ((mod4Mask .|. shiftMask, xK_c), io exitSuccess)
+        , ((mod4Mask, xK_g), gotoMenu)]
+  where
+    myStartupHook = spawn "feh --bg-scale /home/nis/.xmonad/animal.jpg"
+                <+> spawn "udiskie --tray"
+                <+> spawn "nm-applet"
+                <+> spawn "emacs -daemon"
+                <+> spawn "urxvtd -q -f"
+                <+> setWMName "LG3D">> takeTopFocus
+                <+> setDefaultCursor xC_left_ptr
+    myTerminal = "urxvtc"
     myModMask = mod4Mask
-    myWorkSpaces = ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι"]
+    myWorkspaces    = ["T","E","F","U","M","B","A","P","R"]
     scratchpad = scratchpadSpawnActionTerminal "urxvt"
---    scratchpad = scratchpadSpawnActionCustom "xterm -e ps aux | percol | awk '{print $2}' | xargs kill $*  -name scratchpad"
+    -- myLogHook h = dynamicLogWithPP $ defaultPP
+    --     -- display current workspace as darkgrey on light grey (opposite of 
+    --     -- default colors)
+    --     { ppCurrent         = dzenColor "#303030" "#909090" . pad 
 
-       -- layouts
+    --     -- display other workspaces which contain windows as a brighter grey
+    --     , ppHidden          = dzenColor "#909090" "" . pad 
+
+    --     -- display other workspaces with no windows as a normal grey
+    --     , ppHiddenNoWindows = dzenColor "#606060" "" . pad 
+
+    --     -- display the current layout as a brighter grey
+    --     , ppLayout          = dzenColor "#909090" "" . pad 
+
+    --     -- if a window on a hidden workspace needs my attention, color it so
+    --     , ppUrgent          = dzenColor "#ff0000" "" . pad . dzenStrip
+
+    --     -- shorten if it goes over 100 characters
+    --     , ppTitle           = shorten 100
+
+    --     -- no separator between workspaces
+    --     , ppWsSep           = ""
+
+    --     -- put a few spaces between each object
+    --     , ppSep             = "  "
+
+    --     -- output to the handle we were given as an argument
+    --     , ppOutput          = hPutStrLn h
+    --     }
     myLayoutHook =
-        avoidStrutsOn [U] $
+        avoidStrutsOn [U,L,R,D] $
         smartBorders $
-        onWorkspace "8" imLayout $
-        tall ||| wide ||| full ||| circle ||| sTabbed ||| acc
+        (tall ||| wide ||| full ||| circle ||| sTabbed ||| acc)
     tall = renamed [Replace "tall"] $ Tall 1 3.0e-2 0.5
     wide = renamed [Replace "wide"] $ Mirror tall
     full = renamed [Replace "full"] Full
@@ -99,32 +136,37 @@ main =
         greenXPConfig
         { autoComplete = Just 1000
         , font         = myFont
-        -- , bgColor     = backgroundColor
-        -- , fgColor     = textColor
-        -- , fgHLight    = lightTextColor
-        -- , bgHLight    = lightBackgroundColor
-        -- , borderColor = lightBackgroundColor
         , promptBorderWidth = 0
         , position = Top
         }
         where
-         myFont = "xft:Input:size=9"
-         -- focusColor = "#535d6c"
-         -- textColor = "#ff4500"
-         -- lightTextColor = "#222222"
-         -- backgroundColor = "#222222"
-         -- lightBackgroundColor = "#ff4500"
-         -- urgentColor = "#ffc000"
+         myFont = "xft:PragmataPro:size=9"
     allLayouts = ["tall", "wide", "circle", "full", "tabbed", "accordion"]
-   -- manageHook
-    myManageHook =
-       manageDocks <+>
-       floatHook <+> fullscreenManageHook <+> scratchpadManageHookDefault
-   -- Inspect with xprop: appName is the first element in WM_CLASS, while
-   -- className is the second.
-    floatHook =
-       composeAll
-           [ appName =? "gimp-2.8" --> doFloat
-           , className =? "wpa_gui" --> doFloat
-           , appName =? "Google-chrome-beta" --> doShift "γ"
-           , appName =? "xfrun4" --> doFloat]
+    myManageHook = (composeAll . concat $
+          [   [isDialog --> doFloat]
+            , [className =? c --> doFloat | c <- myCFloats]
+            , [title =? t --> doFloat | t <- myTFloats]
+            , [resource =? i --> doIgnore | i <- myIgnores]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "M" | x <- my1Shifts]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "F" | x <- my2Shifts]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "B" | x <- my3Shifts]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "E" | x <- my4Shifts]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "U" | x <- my5Shifts]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "T" | x <- my6Shifts]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "P" | x <- my7Shifts]
+            , [(className =? x <||> title =? x <||> resource =? x) --> doShift "R" | x <- my8Shifts]
+         ])
+         where
+        myCFloats = ["mplayer","vlc","Smplayer","Xmessage", "Toplevel"]
+        myTFloats = ["Save As..."]
+        myIgnores = ["desktop_window","kdesktop"]
+        my1Shifts = []
+        my2Shifts = ["Firefox","Chrome"]
+        my3Shifts = ["irssi*","irssi"]
+        my4Shifts = []
+        my5Shifts = ["Pidgin"]
+        my6Shifts = []
+        my7Shifts = []
+        my8Shifts = []
+        my9Shifts = []
+

@@ -1,7 +1,6 @@
-gtk_color_scheme = "black:#000000\nwhite:#D3D3D3\ngreen:#A9A9A9\nred:#696969"
-
+gtk_color_scheme = "black:#121212\nwhite:#FFFFFF\ngreen:#00FF00\nred:#FF0000"
+gtk-font-name = "Pragmata Pro 11"
 style "default" {
-  font_name = "FontAwesome 10"
   bg[NORMAL]   = @black
   fg[NORMAL]   = @white
   text[NORMAL] = @white
