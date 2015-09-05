@@ -36,17 +36,18 @@ main = do
                                                       ]
                                   , graphLabel = Just "<span fgcolor='red'>☣</span>"
                                   }
-  let clock = textClockNew Nothing "<span fgcolor='lightpink'> ◶ %a %b %_d %H:%M</span>" 1
+  let clock = textClockNew Nothing "<span fgcolor='orchid'> ◶ %a %b %_d %H:%M</span>" 1
       pager = taffyPagerNew defaultPagerConfig
-                  { activeWindow     = colorize "#F0E68C" "" . escape . shorten 50
+                  { activeWindow     = colorize "#4169E1" "" . escape . shorten 50
                   , activeLayout     = colorize "#DB7093" "" . escape
-                  , activeWorkspace  = colorize "#4169E1" "" . escape
+                  , activeWorkspace  = colorize "#8FBC8F" "" . escape
                   , hiddenWorkspace  = colorize "#78898D" "" . escape
                   , emptyWorkspace   = colorize "#34495E" "" . escape
 --                , visibleWorkspace = colorize "#a88500" "" . escape
                   , urgentWorkspace  = colorize "red" "yellow" . escape
                   , widgetSep        = " "
                   }
+---"#4169E1""#8FBC8F"
       note = notifyAreaNew defaultNotificationConfig
       mpris = mpris2New
       mem = pollingGraphNew memCfg 1 memCallback
