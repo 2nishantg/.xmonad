@@ -1,4 +1,5 @@
-gtk_color_scheme = "black:#121212\nwhite:#FFFFFF\ngreen:#00FF00\nred:#FF0000"
+##151515
+gtk_color_scheme = "black:#021B21\nwhite:#FFFFFF\ngreen:#00FF00\nred:#FF0000"
 gtk-font-name = "Pragmata Pro 11"
 style "default" {
   bg[NORMAL]   = @black
@@ -15,8 +16,9 @@ style "active-window" = "default" {
 style "notification-button" = "default" {
   text[NORMAL] = @red
   fg[NORMAL]   = @red
+  bg[NORMAL]   = @white
 }
 
 widget "Taffybar*" style "default"
 widget "Taffybar*WindowSwitcher*label" style "active-window"
-widget "*NotificationCloseButton" style "notification-button"
+widget "*Notification*" style "notification-button"

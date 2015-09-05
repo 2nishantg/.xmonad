@@ -6,7 +6,7 @@ import System.Taffybar.TaffyPager
 import System.Taffybar.SimpleClock
 import System.Taffybar.FreedesktopNotifications
 import System.Taffybar.Weather()
-import System.Taffybar.MPRIS
+import System.Taffybar.MPRIS2
 import System.Taffybar.Pager
 import System.Taffybar.Widgets.PollingBar()
 import System.Taffybar.Widgets.PollingGraph
@@ -29,32 +29,33 @@ cpuCallback = do
 main :: IO ()
 main = do
   let memCfg = defaultGraphConfig { graphDataColors = [(0, 1, 1, 1)]
-                                  , graphLabel = Just "☡"
+                                  , graphLabel = Just "<span fgcolor='yellow'> ☳ </span>"
                                   }
       cpuCfg = defaultGraphConfig { graphDataColors = [ (1, 0, 0, 1)
-                                                      , (1, 0, 1, 0.5)
+                                                      , (1, 0, 1, 0.7)
                                                       ]
-                                  , graphLabel = Just "☣"
+                                  , graphLabel = Just "<span fgcolor='red'>☣</span>"
                                   }
-  let clock = textClockNew Nothing "<span fgcolor='yellow'> ◴ %a %b %_d %H:%M</span>" 1
+  let clock = textClockNew Nothing "<span fgcolor='lightpink'> ◶ %a %b %_d %H:%M</span>" 1
       pager = taffyPagerNew defaultPagerConfig
-                  { activeWindow     = colorize "#0C9D52" "" . escape . shorten 140
-                  , activeLayout     = colorize"#F5F5F5" "" . escape
+                  { activeWindow     = colorize "#F0E68C" "" . escape . shorten 50
+                  , activeLayout     = colorize "#DB7093" "" . escape
                   , activeWorkspace  = colorize "#4169E1" "" . escape
                   , hiddenWorkspace  = colorize "#78898D" "" . escape
                   , emptyWorkspace   = colorize "#34495E" "" . escape
---                  , visibleWorkspace = colorize "#a88500" "" . escape
+--                , visibleWorkspace = colorize "#a88500" "" . escape
                   , urgentWorkspace  = colorize "red" "yellow" . escape
                   , widgetSep        = " "
                   }
       note = notifyAreaNew defaultNotificationConfig
-      mpris = mprisNew defaultMPRISConfig
+      mpris = mpris2New
       mem = pollingGraphNew memCfg 1 memCallback
       cpu = pollingGraphNew cpuCfg 1 cpuCallback
       tray = systrayNew
       battery = batteryBarNew  defaultBatteryConfig 25
-      net_wlan = netMonitorNew 1.5 "wlan0"
-      net_eth = netMonitorNew 1.5 "eth0"
+      myNetFormat = "<span fgcolor='seagreen'>▼ $inKB$kb/s</span><span fgcolor='crimson'> ▲ $outKB$kb/s</span>"
+      net_wlan = netMonitorNewWith 1.5 "wlan0" 2 myNetFormat
+      net_eth = netMonitorNewWith 1.5 "eth0" 2 myNetFormat
   defaultTaffybar defaultTaffybarConfig { startWidgets = [ pager, note ]
                                         , endWidgets = [ tray, clock,battery, net_wlan, net_eth, mem, cpu, mpris ]
                                         , monitorNumber = 1

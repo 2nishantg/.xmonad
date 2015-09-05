@@ -2,6 +2,9 @@
 import Data.Ratio ((%))
 import System.Exit
 import XMonad hiding ((|||))
+import XMonad.Actions.CycleWS
+import XMonad.Actions.RotSlaves
+import XMonad.Actions.Search
 import XMonad.Actions.WindowBringer
 import XMonad.Actions.WindowGo
 import XMonad.Hooks.DynamicLog
@@ -24,11 +27,19 @@ import XMonad.Layout.Tabbed
 import XMonad.Prompt
 import XMonad.Prompt.Input
 import XMonad.Prompt.Shell
+import XMonad.Prompt.XMonad
+import XMonad.Prompt.AppendFile
+import XMonad.Prompt.RunOrRaise
 import XMonad.Util.Cursor
 import XMonad.Util.EZConfig
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad
+import qualified XMonad.Actions.Search as S
+import qualified XMonad.Actions.Submap as SM
 import qualified XMonad.StackSet as W
+import qualified Data.Map as M
+
+
 
 main :: IO ()
 main = do
@@ -64,55 +75,46 @@ main = do
         , ((mod4Mask, xK_y), focusUrgent)
         , ((mod4Mask .|. shiftMask, xK_space), myLayoutPrompt)
         , ((mod4Mask, xK_p), shellPrompt myXPConfig)
-        , ( (mod4Mask .|. shiftMask, xK_p)
+        , ((mod4Mask .|. shiftMask, xK_p)
           , shellPrompt
                 greenXPConfig
                 { font = "xft:PragmataPro:size=9"
                 })
         , ((mod4Mask .|. shiftMask, xK_q), kill) -- %! Close the focused window
+        , ((mod4Mask, xK_s), SM.submap $ searchEngineMap $ promptSearchBrowser
+                             greenXPConfig {
+                               font = "xft:PragmataPro:size=9"
+                               } "firefox")
+        , ((mod4Mask .|. shiftMask, xK_s), selectSearchBrowser "firefox" google ) 
+        , ((mod4Mask .|. controlMask, xK_l  ), spawn "xscreensaver-command -lock")
         , ((mod4Mask .|. shiftMask, xK_c), io exitSuccess)
-        , ((mod4Mask, xK_g), gotoMenu)]
+        , ((mod4Mask , xK_m),   nextWS)
+        , ((mod4Mask .|. shiftMask, xK_m), shiftToNext >> nextWS)
+        , ((mod4Mask, xK_n),   prevWS)
+        , ((mod4Mask .|. shiftMask, xK_n), shiftToPrev >> prevWS)
+        , ((mod4Mask, xK_z),     toggleWS)
+        , ((mod4Mask .|. controlMask, xK_x), xmonadPrompt myXPConfig)
+        , ((mod4Mask, xK_d), runOrRaisePrompt myXPConfig)
+        , ((mod4Mask, xK_f), sendMessage $ ToggleStruts)
+--        , ((mod4Mask, xK_u), appendFilePrompt myXPConfig "/home/nis/NOTES")
+--        , ((mod4Mask, xK_i), appendFilePrompt myXPConfig "/home/nis/IDEAS")
+        , ((mod4Mask, xK_g), gotoMenu)
+         ] `additionalMouseBindings`
+        [ ((mod4Mask, button4), (\_ -> nextWS))
+        , ((mod4Mask, button5), (\_ -> prevWS))]
   where
-    myStartupHook = spawn "feh --bg-scale /home/nis/.xmonad/animal.jpg"
+    myStartupHook = spawn "feh --randomize --bg-scale /home/nis/.xmonad/wallpaper/* "
                 <+> spawn "udiskie --tray"
                 <+> spawn "nm-applet"
                 <+> spawn "emacs -daemon"
                 <+> spawn "urxvtd -q -f"
+                <+> spawn "xscreensaver -nosplash"
                 <+> setWMName "LG3D">> takeTopFocus
                 <+> setDefaultCursor xC_left_ptr
     myTerminal = "urxvtc"
     myModMask = mod4Mask
     myWorkspaces    = ["T","E","F","U","M","B","A","P","R"]
     scratchpad = scratchpadSpawnActionTerminal "urxvt"
-    -- myLogHook h = dynamicLogWithPP $ defaultPP
-    --     -- display current workspace as darkgrey on light grey (opposite of 
-    --     -- default colors)
-    --     { ppCurrent         = dzenColor "#303030" "#909090" . pad 
-
-    --     -- display other workspaces which contain windows as a brighter grey
-    --     , ppHidden          = dzenColor "#909090" "" . pad 
-
-    --     -- display other workspaces with no windows as a normal grey
-    --     , ppHiddenNoWindows = dzenColor "#606060" "" . pad 
-
-    --     -- display the current layout as a brighter grey
-    --     , ppLayout          = dzenColor "#909090" "" . pad 
-
-    --     -- if a window on a hidden workspace needs my attention, color it so
-    --     , ppUrgent          = dzenColor "#ff0000" "" . pad . dzenStrip
-
-    --     -- shorten if it goes over 100 characters
-    --     , ppTitle           = shorten 100
-
-    --     -- no separator between workspaces
-    --     , ppWsSep           = ""
-
-    --     -- put a few spaces between each object
-    --     , ppSep             = "  "
-
-    --     -- output to the handle we were given as an argument
-    --     , ppOutput          = hPutStrLn h
-    --     }
     myLayoutHook =
         avoidStrutsOn [U,L,R,D] $
         smartBorders $
@@ -123,8 +125,6 @@ main = do
     circle = renamed [Replace "circle"] circleSimpleDefaultResizable
     sTabbed = renamed [Replace "tabbed"]  simpleTabbed
     acc = renamed [Replace "accordion"] Accordion
-    imLayout = withIM (1 % 7) pidginRoster Grid
-    pidginRoster = ClassName "Pidgin" `And` Role "buddy_list"
     -- layout prompt (w/ auto-completion and all layouts)
     myLayoutPrompt =
         inputPromptWithCompl
@@ -142,6 +142,14 @@ main = do
         where
          myFont = "xft:PragmataPro:size=9"
     allLayouts = ["tall", "wide", "circle", "full", "tabbed", "accordion"]
+    searchEngineMap method = M.fromList $
+       [ ((0, xK_g), method S.google )
+       , ((0, xK_y), method S.youtube )
+       , ((0, xK_m), method S.maps )
+       , ((0, xK_d), method S.dictionary )
+       , ((0, xK_w), method S.wikipedia )
+       , ((0, xK_a), method S.amazon )
+       ]
     myManageHook = (composeAll . concat $
           [   [isDialog --> doFloat]
             , [className =? c --> doFloat | c <- myCFloats]
