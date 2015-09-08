@@ -50,7 +50,7 @@ main = do
 ---"#4169E1""#8FBC8F"
       note = notifyAreaNew defaultNotificationConfig
       mpris = mpris2New
-      mem = pollingGraphNew memCfg 1 memCallback
+      mem = pollingGraphNew memCfg 1 memCallback 
       cpu = pollingGraphNew cpuCfg 1 cpuCallback
       tray = systrayNew
       battery = batteryBarNew  defaultBatteryConfig 25
